@@ -1,20 +1,22 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using Lrw.Script._Core._Debug;
 using UnityEngine;
 
 namespace Lrw.Script._Core._FSM
 {
     public class StateMachine<TK>
     {
-        private Dictionary<TK,IState> _states = new();
+        private readonly Dictionary<TK,IState> _states = new();
         
         private IState _currentState;
-        
+
         public void AddState(TK key, IState state)
         {
             if (!_states.TryAdd(key, state))
             {
-                Debug.LogError($"{state.GetType().Name} is already added!");
+                FDebug.LogError($"{state.GetType().Name} is already added!");
             }
         }
 
@@ -29,17 +31,19 @@ namespace Lrw.Script._Core._FSM
         {
             if (key == null)
             {
-                Debug.LogWarning("State Key is null");
+                FDebug.LogWarning("State Key is null");
                 return null;
             }
             
             if(_states.TryGetValue(key,out IState state))
                 return state;
             
-            Debug.LogWarning("State not found");
+            FDebug.LogWarning("State not found");
             return null;
         }
-
+        
+        public bool CheckType<T>() where T : IState => _currentState is T;
+        
         public IState[] GetStates() => _states.Values.ToArray();
         public TK[] GetKeys() => _states.Keys.ToArray();
         

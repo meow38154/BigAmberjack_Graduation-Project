@@ -1,9 +1,13 @@
 using System;
 using System.Linq;
+using Lrw.Script._Core._Debug;
 using UnityEngine;
 
 namespace Lrw.Script._Core._Manager
 {
+    /// <summary>
+    /// GameManager는 실행시 자동 생성 됩니다.
+    /// </summary>
     [DefaultExecutionOrder(-20)]
     public class GameManager : MonoBehaviour
     {
@@ -11,10 +15,10 @@ namespace Lrw.Script._Core._Manager
         
         private void Awake()
         {
-            RuntimeInitialize();
+            Initialize();
         }
         
-        private void RuntimeInitialize()
+        private void Initialize()
         {
             GameObject[] managerObjects = FindManagerTypes().Select(x => new GameObject(x.Name, x)).ToArray();
 
@@ -43,11 +47,21 @@ namespace Lrw.Script._Core._Manager
                 .ToArray();
         }
         
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        public static void Init()
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        public static void CreateManager()
         {
             GameObject manager = new GameObject("GameManager",typeof(GameManager));
+            DontDestroyOnLoad(manager);
         }
-        
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            if (!Application.isPlaying)
+            {
+                FDebug.LogError("GameManager를 수동으로 생성하지 마시오.");
+            }
+        }
+#endif
     }
 }
